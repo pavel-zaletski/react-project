@@ -14,6 +14,7 @@ import {
   Text,
   useColorScheme,
   View,
+  Button,
 } from 'react-native';
 
 import {
@@ -23,6 +24,23 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://2902aa57c41495cf0906e31d0517f6bf@sentry.salesmsgdev.com/5',
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [Sentry.mobileReplayIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -32,6 +50,7 @@ function Section({children, title}: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
+
       <Text
         style={[
           styles.sectionTitle,
@@ -78,33 +97,30 @@ function App(): React.JSX.Element {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+       <Button title='Throw Error' onPress={ () => {
+          throw new Error('Throw Error crash ===============>');
+        }}
+        />
+        <Text>Native Crash</Text>
+
+        <Button title='Native Crash' onPress={ () => {
+          Sentry.nativeCrash();
+        }}
+        />
+
+        <Text>test_error()</Text>
+
+        <Button title='test_error()' onPress={ () => {
+          test_error();
+        }}
+        />
+
+        <Text>Capture Exception</Text>
+
+        <Button title='Capture Exception' onPress={ () => {
+          Sentry.captureException(new Error('Capture Exception ===>'));
+        }}
+        />
     </View>
   );
 }
@@ -128,4 +144,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default Sentry.wrap(App);
